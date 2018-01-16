@@ -7,21 +7,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.sasl.provided.SASLPlainMechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.iqregister.AccountManager;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Set;
 
 public class MyTestActivity extends AppCompatActivity {
-    private EditText ed1, ed2, ed3, ed4;
-    private String user1, user2, password1, password2;
-    private Button login, register;
+    private EditText ed1, ed2;
+    private String user1, password1;
+    private Button login, register, zhuxiao, xiugainima,deleteuserInfo,huoquzhanghuoxin;
     private XMPPTCPConnection mConnection;
+    private Set<String> userInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,16 +38,18 @@ public class MyTestActivity extends AppCompatActivity {
         }
         ed1 = (EditText) findViewById(R.id.editView1);
         ed2 = (EditText) findViewById(R.id.editView2);
-        ed3 = (EditText) findViewById(R.id.editView3);
-        ed4 = (EditText) findViewById(R.id.editView4);
         login = (Button) findViewById(R.id.denglu);
         register = (Button) findViewById(R.id.zhuche);
+        zhuxiao = (Button) findViewById(R.id.zhuxiao);
+        xiugainima = (Button) findViewById(R.id.xiugainima);
+        deleteuserInfo = (Button) findViewById(R.id.shanchuyonghuxingxi);
+        huoquzhanghuoxin = (Button) findViewById(R.id.huoquyonghuxinxi);
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-
+                mConnection = connect();
                 user1 = ed1.getText().toString();
                 password1 = ed2.getText().toString();
                 boolean result = false;
@@ -55,6 +62,7 @@ public class MyTestActivity extends AppCompatActivity {
                 if (result)
                 {
                     Log.d("success",",登录成功");
+                    Toast.makeText(MyTestActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
                 }else
                 {
                     Log.d("error",",登录失败");
@@ -66,12 +74,14 @@ public class MyTestActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                user2 = ed3.getText().toString();
-                password2 = ed4.getText().toString();
-                boolean result = registerUser(user2,password2);
+                mConnection = connect();
+                user1 = ed1.getText().toString();
+                password1 = ed1.getText().toString();
+                boolean result = registerUser(user1,password1);
                 if (result)
                 {
                     Log.d("success",",注册成功");
+                    Toast.makeText(MyTestActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
                 }else
                 {
                     Log.d("error","注册失败");
@@ -80,13 +90,56 @@ public class MyTestActivity extends AppCompatActivity {
             }
         });
 
-        mConnection = connect();
+        zhuxiao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (logout())
+                {
+                    Toast.makeText(MyTestActivity.this, "注销成功", Toast.LENGTH_SHORT).show();
+                }else
+                {
+                    Toast.makeText(MyTestActivity.this, "注销失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        xiugainima.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (changePassword(password1))
+                {
+                    Toast.makeText(MyTestActivity.this, "修改成功", Toast.LENGTH_SHORT).show();
+                }else
+                {
+                    Toast.makeText(MyTestActivity.this, "修改失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        huoquzhanghuoxin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                 userInfo =  getAccountAttributes();
+                for (Iterator iterator = userInfo.iterator();iterator.hasNext();)
+                {
+                    String string = (String) iterator.next();
+                    Log.d("userinfo : ", string);
+                }
+            }
+        });
+
+        //mConnection = connect();
 
 
 
     }
 
 
+    /**
+     * 连接方法
+     * @return
+     */
     private XMPPTCPConnection connect() {
         try {
             XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
@@ -147,6 +200,7 @@ public class MyTestActivity extends AppCompatActivity {
             return false;
         }
         try {
+            SASLAuthentication.registerSASLMechanism(new SASLPlainMechanism());
             AccountManager.getInstance(mConnection).createAccount(user, password);
             return true;
         } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | SmackException.NotConnectedException e) {
@@ -168,6 +222,7 @@ public class MyTestActivity extends AppCompatActivity {
             return false;
         }
         try {
+            SASLAuthentication.registerSASLMechanism(new SASLPlainMechanism());
             mConnection.login(user, password);
             return  true;
         } catch (Exception e) {
