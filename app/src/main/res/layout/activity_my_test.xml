@@ -30,16 +30,16 @@
 
     <Button
         android:id="@+id/denglu"
-        android:text="登录"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="登录" />
 
 
     <Button
-        android:id="@+id/zhuche"
+        android:id="@+id/sendMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="注册"/>
+        android:text="发送消息"/>
 
     <Button
         android:id="@+id/zhuxiao"
@@ -48,21 +48,27 @@
         android:text="注销" />
 
     <Button
-        android:id="@+id/xiugainima"
+        android:id="@+id/setChatListener"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="修改密码" />
+        android:text="设置聊天监听" />
 
     <Button
-        android:id="@+id/shanchuyonghuxingxi"
+        android:id="@+id/getLianXinxi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="删除当前登录的用户信息" />
+        android:text="获取离线信息" />
 
     <Button
         android:id="@+id/huoquyonghuxinxi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="获取账户所有属性信息" />
+
+    <Button
+        android:id="@+id/addfriends"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="加好友" />
 
 </LinearLayout>
