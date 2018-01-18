@@ -208,7 +208,6 @@ public class MyTestActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * 是否连接成功
      * @return
