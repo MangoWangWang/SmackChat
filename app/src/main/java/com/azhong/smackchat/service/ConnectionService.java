@@ -23,7 +23,7 @@ import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat.ChatManagerListener;
 import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.filter.AndFilter;
-import org.jivesoftware.smack.filter.StanzaFilter;
+import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
@@ -52,12 +52,53 @@ import java.util.Map;
  */
 public class ConnectionService extends Service {
 
-    public static final String SERVER_NAME = "izqhrnmkjn55syz";//主机名
-    public static final String SERVER_IP = "192.168.0.252";//ip
+    public static final String SERVER_NAME = "iz4qvlxllh87cdz";//主机名
+    public static final String SERVER_IP = "120.79.62.147";//ip
     public static final int PORT = 5222;//端口
     private XMPPTCPConnection connection;
     private DbHelper dbHelper;
-    private User user;//用户信息
+    private User user;//用户信息  创建user
+
+
+
+    static StanzaListener packetListener = new StanzaListener() {
+        @Override
+        public void processPacket(Stanza packet) throws SmackException.NotConnectedException {
+            if (packet instanceof Presence) {
+                Presence presence = (Presence) packet;
+                String fromId = presence.getFrom();
+                String from = presence.getFrom().split("@")[0];//我这里只为了打印去掉了后缀
+                if (presence.getType().equals(Presence.Type.subscribe)) {
+                    Log.d("connectService","yangbinnew请求添加好友" + from);
+                    RxBus.getInstance().post(new FriendListenerEvent(from, "subscrib", "MainActivity"));
+                } else if (presence.getType().equals(Presence.Type.subscribed)) {//对方同意订阅
+                    RxBus.getInstance().post(new FriendListenerEvent(from, "subscribed", "MainActivity"));
+                    Log.d("connectService","yangbinnew同意订阅" + from);
+                } else if (presence.getType().equals(Presence.Type.unsubscribe)) {//取消订阅
+                    RxBus.getInstance().post(new FriendListenerEvent(from, "unsubscribe", "MainActivity"));
+                    Log.d("connectService","yangbinnew取消订阅" + from);
+                } else if (presence.getType().equals(Presence.Type.unsubscribed)) {//拒绝订阅
+                    Log.d("connectService","yangbinnew拒绝订阅" + from);
+                } else if (presence.getType().equals(Presence.Type.unavailable)) {//离线
+                    Log.d("connectService","yangbinnew离线" + from);
+                } else if (presence.getType().equals(Presence.Type.available)) {//上线
+                    Log.d("connectService","yangbinnew上线" + from);
+                }
+            }
+        }
+    };
+
+  //  public void processPacket(Stanza packet) {
+//                Presence p = (Presence) packet;
+//                Log.e("TAG", "--" + p.getFrom() + "--" + p.getType());
+//                if (p.getType().toString().equals("subscrib")) {
+//                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "subscrib", "MainActivity"));
+//                } else if (p.getType().toString().equals("subscribed")) {
+//                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "subscribed", "MainActivity"));
+//                } else if (p.getType().toString().equals("unsubscribe")) {
+//                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "unsubscribe", "MainActivity"));
+//                }
+//            }
 
     /**
      * 获取用户信息
@@ -71,6 +112,13 @@ public class ConnectionService extends Service {
             return null;
         }
     }
+
+
+    /**
+     * 绑定服务的返回值,调用bindService时调用
+     * @param intent
+     * @return
+     */
 
     @Nullable
     @Override
@@ -198,7 +246,7 @@ public class ConnectionService extends Service {
                 }
                 try {
                     ConnectionService.this.connection.login(userName, password);//登录
-                    user = dbHelper.SetUser(userName + "@106.14.20.176", password);//插入数据库
+                    user = dbHelper.SetUser(userName + "@120.79.62.147", password);//插入数据库
                     getOfflineMessage();//一上线获取离线消息
                     initListener();//登录成功开启消息监听
                     RxBus.getInstance().post(new HandleEvent("LoginActivity", true));
@@ -289,8 +337,8 @@ public class ConnectionService extends Service {
      */
     public boolean addFriend(String account, String nickName, String[] groupName) {
         try {
-            Roster.getInstanceFor(connection).createEntry(account + "@" + SERVER_IP, "", groupName);
-            Log.e("TAG", account + "@" + SERVER_IP + "/smack");
+            Roster.getInstanceFor(connection).createEntry(account + "@" + SERVER_NAME, "", groupName);
+            Log.e("TAG", account + "@" + SERVER_NAME + "/smack");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -303,23 +351,27 @@ public class ConnectionService extends Service {
      * 好友信息监听
      */
     public void requestListener() {
-        //条件过滤
-        StanzaFilter filter = new AndFilter();
-        StanzaListener listener = new StanzaListener() {
-            @Override
-            public void processPacket(Stanza packet) {
-                Presence p = (Presence) packet;
-                Log.e("TAG", "--" + p.getFrom() + "--" + p.getType());
-                if (p.getType().toString().equals("subscrib")) {
-                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "subscrib", "MainActivity"));
-                } else if (p.getType().toString().equals("subscribed")) {
-                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "subscribed", "MainActivity"));
-                } else if (p.getType().toString().equals("unsubscribe")) {
-                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "unsubscribe", "MainActivity"));
-                }
-            }
-        };
-        connection.addAsyncStanzaListener(listener, filter);
+//        //条件过滤
+//        StanzaFilter filter = new AndFilter();
+//        StanzaListener listener = new StanzaListener() {
+//            @Override
+//            public void processPacket(Stanza packet) {
+//                Presence p = (Presence) packet;
+//                Log.e("TAG", "--" + p.getFrom() + "--" + p.getType());
+//                if (p.getType().toString().equals("subscrib")) {
+//                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "subscrib", "MainActivity"));
+//                } else if (p.getType().toString().equals("subscribed")) {
+//                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "subscribed", "MainActivity"));
+//                } else if (p.getType().toString().equals("unsubscribe")) {
+//                    RxBus.getInstance().post(new FriendListenerEvent(p.getFrom(), "unsubscribe", "MainActivity"));
+//                }
+//            }
+//        };
+//        connection.addAsyncStanzaListener(listener, filter);
+        //条件过滤器
+        AndFilter filter = new AndFilter(new StanzaTypeFilter(Presence.class));
+        //添加监听
+        connection.addAsyncStanzaListener(packetListener, filter);
     }
 
     /**

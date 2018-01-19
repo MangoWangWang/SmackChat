@@ -154,7 +154,7 @@ public class MainActivity extends BaseActivity implements TabLayout.OnTabSelecte
                 startActivity(intent2);
                 break;
             case R.id.add_friend:
-                service.addFriend("yuhengfeng", "", null);
+                service.addFriend("1031", "", null);
                 break;
             default:
                 break;

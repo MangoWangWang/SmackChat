@@ -17,17 +17,36 @@
         </activity>
         <activity android:name=".MyServiceActivity">
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
         </activity>
 
         <service android:name=".MyService"
                 android:process=":remote"
             />
+
+
+
+        android:theme="@style/AppTheme">
+        <activity android:name=".founction.user.activity.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".service.ConnectionService" />
+
+        <activity android:name=".founction.main.activity.MainActivity" />
+        <activity
+            android:name=".common.base.BaseActivity"
+            android:label="基类" />
+        <activity android:name=".founction.chat.activity.ChatActivity" />
+        <activity android:name=".founction.user.activity.RegisterActivity" />
+        <activity android:name=".founction.group.activity.JoinGroupActivity" />
+        <activity android:name=".founction.group.activity.CreateGroupActivity" />
+        <activity android:name=".founction.group.activity.GroupListActivity" />
+        <activity android:name=".founction.group.activity.GroupChatActivity" />
+        <activity android:name=".founction.group.activity.UserListActivity"></activity>
     </application>
 
 </manifest>

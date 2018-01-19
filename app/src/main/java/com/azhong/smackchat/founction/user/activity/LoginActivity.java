@@ -50,6 +50,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private Subscription subscribe;
 
 
+    private  ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder iBinder) {
+            ConnectionService.LocalBinder binder = (ConnectionService.LocalBinder) iBinder;
+            service = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,18 +84,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     public void bindService() {
         //开启服务获得与服务器的连接
         Intent intent = new Intent(this, ConnectionService.class);
-        bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder iBinder) {
-                ConnectionService.LocalBinder binder = (ConnectionService.LocalBinder) iBinder;
-                service = binder.getService();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        }, BIND_AUTO_CREATE);
+        bindService(intent,serviceConnection, BIND_AUTO_CREATE);
         startService(intent);
     }
 
@@ -133,6 +136,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         if (!subscribe.isUnsubscribed()) {
             subscribe.unsubscribe();
         }
+        unbindService(serviceConnection);
         super.onDestroy();
 
     }
